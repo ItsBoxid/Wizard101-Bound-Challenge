@@ -1,18 +1,18 @@
 
-/* =========================
+/* =====================
    GLOBAL
-========================= */
+===================== */
 
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     background: #111;
     color: white;
 }
 
-/* =========================
+/* =====================
    TOP BAR
-========================= */
+===================== */
 
 #topbar {
     height: 55px;
@@ -22,35 +22,29 @@ body {
     padding: 0 15px;
     border-bottom: 1px solid #333;
     background: #111;
-    position: sticky;
-    top: 0;
-    z-index: 100;
 }
 
-/* =========================
-   MAIN LAYOUT
-========================= */
+/* =====================
+   LAYOUT
+===================== */
 
 #layout {
     display: flex;
     height: calc(100vh - 55px);
 }
 
-/* =========================
-   WORLD PANEL (FIXED)
-========================= */
+/* =====================
+   WORLD PANEL
+===================== */
 
 #worldPanel {
-    width: 150px;
-    min-width: 150px;
+    width: 160px;
     border-right: 1px solid #333;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    overflow: hidden; /* IMPORTANT: prevents bleed into topbar */
+    overflow: hidden;
 }
 
-/* scroll area only */
 #worldList {
     flex: 1;
     overflow-y: auto;
@@ -58,35 +52,25 @@ body {
     font-size: 13px;
 }
 
-/* world entries */
 .worldItem {
-    padding: 6px 4px;
+    padding: 6px;
     opacity: 0.6;
-    white-space: nowrap;
 }
 
 .worldItem.current {
     opacity: 1;
     font-weight: bold;
-    color: #ffd54a;
+    color: gold;
 }
 
-/* footer button always visible */
 #worldFooter {
-    padding: 8px;
     border-top: 1px solid #333;
-    background: #111;
+    padding: 8px;
 }
 
-#completeWorldBtn {
-    width: 100%;
-    padding: 6px;
-    cursor: pointer;
-}
-
-/* =========================
+/* =====================
    MAIN PANEL
-========================= */
+===================== */
 
 #mainPanel {
     flex: 1;
@@ -94,9 +78,9 @@ body {
     padding: 15px;
 }
 
-/* =========================
+/* =====================
    CARDS
-========================= */
+===================== */
 
 .cardContainer {
     display: flex;
@@ -104,32 +88,22 @@ body {
     gap: 12px;
 }
 
-/* base card */
 .card {
     width: 200px;
     min-height: 220px;
-
     background: #1a1a1a;
     border-radius: 12px;
     padding: 10px;
-
     display: flex;
     flex-direction: column;
-
-    transition: 0.15s ease;
-
-    cursor: default;
-
-    /* 🔥 THIS IS WHAT YOU'RE MISSING */
     border: 1px solid rgba(255,255,255,0.08);
+    transition: 0.15s;
 }
 
-/* hover effect */
 .card:hover {
-    transform: scale(1.04);
+    transform: scale(1.05);
 }
 
-/* rarity glow */
 .card.rare {
     box-shadow: 0 0 10px purple;
 }
@@ -138,83 +112,40 @@ body {
     box-shadow: 0 0 14px gold;
 }
 
-/* tree label */
 .tree {
     margin-top: auto;
     text-align: center;
     font-weight: bold;
 }
 
-/* =========================
-   CURSOR FIXES
-========================= */
-
-button {
-    cursor: pointer;
-}
-
-.draftCard {
-    cursor: pointer;
-}
-
-/* =========================
-   DRAFT OVERLAY (FULLSCREEN MODAL)
-========================= */
+/* =====================
+   DRAFT MODAL (CINEMATIC)
+===================== */
 
 #draftOverlay {
     position: fixed;
     inset: 0;
-    width: 100vw;
-    height: 100vh;
-
-    background: radial-gradient(circle at center, rgba(0,0,0,0.7), rgba(0,0,0,0.95));
-
+    background: rgba(0,0,0,0.9);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-
     z-index: 9999;
 }
 
-/* remove “boxed UI” feeling */
 #draftBox {
-    width: 100vw;
-    height: 100vh;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    padding: 40px;
     text-align: center;
-
-    background: transparent;
-    box-shadow: none;
-}
-
-#draftBox h2 {
-    font-size: 32px;
-    margin-bottom: 30px;
-    letter-spacing: 1px;
 }
 
 #draftCards {
     display: flex;
-    gap: 25px;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
 }
 
-/* hover feel for draft selection */
 .draftCard {
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .draftCard:hover {
     transform: scale(1.08);
-    box-shadow: 0 0 15px rgba(255,255,255,0.2);
 }
