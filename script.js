@@ -1,39 +1,76 @@
 const cards = [
-    "Blades I",
-    "Healer I",
-    "Cross-Trained",
-    "Spell Caster",
-    "Traps I",
-    "Shields I",
-    "Card Collector",
-    "Minion Friend"
+    {
+        name: "Blades I",
+        tree: "Offense",
+        color: "#d94a4a"
+    },
+
+    {
+        name: "Healer I",
+        tree: "Defense",
+        color: "#4a7fd9"
+    },
+
+    {
+        name: "Cross-Trained",
+        tree: "Control",
+        color: "#d9c54a"
+    },
+
+    {
+        name: "Spell Caster",
+        tree: "Gear",
+        color: "#4ad96f"
+    },
+
+    {
+        name: "Traps I",
+        tree: "Offense",
+        color: "#d94a4a"
+    },
+
+    {
+        name: "Shields I",
+        tree: "Defense",
+        color: "#4a7fd9"
+    },
+
+    {
+        name: "Card Collector",
+        tree: "Control",
+        color: "#d9c54a"
+    },
+
+    {
+        name: "Minion Friend",
+        tree: "Control",
+        color: "#d9c54a"
+    }
 ];
 
-const generateBtn =
-    document.getElementById("generateBtn");
-
-const cardsContainer =
-    document.getElementById("cards");
+const generateBtn = document.getElementById("generateBtn");
+const cardsContainer = document.getElementById("cards");
 
 generateBtn.addEventListener("click", () => {
 
     cardsContainer.innerHTML = "";
 
-    const shuffled =
-        [...cards].sort(() => Math.random() - 0.5);
+    const shuffled = [...cards].sort(() => Math.random() - 0.5);
 
-    const selected =
-        shuffled.slice(0, 3);
+    const selected = shuffled.slice(0, 3);
 
-    selected.forEach(cardName => {
+    selected.forEach(cardData => {
 
-        const card =
-            document.createElement("div");
+        const card = document.createElement("div");
 
         card.classList.add("card");
 
-        card.textContent =
-            cardName;
+        card.style.border = `4px solid ${cardData.color}`;
+
+        card.innerHTML = `
+            <h2>${cardData.name}</h2>
+            <p>${cardData.tree}</p>
+        `;
 
         cardsContainer.appendChild(card);
 
