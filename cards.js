@@ -253,7 +253,9 @@ const cards = [
         type: "Utility",
         effect: "Auras may be used.",
         maxCopies: 1,
-        requirements: {}
+        requirements: {
+            world: "Dragonspyre"
+        }
     },
 
     {
