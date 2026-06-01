@@ -27,9 +27,72 @@ function loadProfiles() {
         button.style.display = "block";
         button.style.margin = "10px auto";
 
+        button.addEventListener("click", () => {
+
+            localStorage.setItem(
+                "activeProfile",
+                profile.name
+            );
+
+            showProfile(profile);
+
+        });
+
         profilesDiv.appendChild(button);
 
     });
+
+}
+
+function showProfile(profile) {
+
+    document.body.innerHTML = `
+        <h1>${profile.name}</h1>
+
+        <h2>
+            Current World:
+            ${profile.currentWorld}
+        </h2>
+
+        <h2>Owned Cards</h2>
+
+        <div id="ownedCards"></div>
+
+        <button id="backButton">
+            Back
+        </button>
+    `;
+
+    const ownedCardsDiv =
+        document.getElementById("ownedCards");
+
+    if (profile.ownedCards.length === 0) {
+
+        ownedCardsDiv.innerHTML =
+            "<p>No cards yet.</p>";
+
+    } else {
+
+        profile.ownedCards.forEach(card => {
+
+            const p =
+                document.createElement("p");
+
+            p.textContent = card;
+
+            ownedCardsDiv.appendChild(p);
+
+        });
+
+    }
+
+    document
+        .getElementById("backButton")
+        .addEventListener("click", () => {
+
+            location.reload();
+
+        });
 
 }
 
