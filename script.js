@@ -322,16 +322,51 @@ function makeCard(card) {
     const div = document.createElement("div");
     div.className = "card";
 
+    // CATEGORY CLASS (LOWERCASE SAFE)
+    const category = (card.tree || "").toLowerCase();
+    div.classList.add(category);
+
+    // rarity styling
     if (card.rarity === "Rare") div.classList.add("rare");
     if (card.rarity === "Legendary") div.classList.add("legendary");
 
     div.innerHTML = `
         <h3>${card.name}</h3>
         <p>${card.effect}</p>
-        <div class="tree">${card.tree}</div>
+
+        <div class="tree category" style="color:${getCategoryColor(category)}">
+            ${card.tree}
+        </div>
     `;
 
     return div;
+}
+
+function getCategoryColor(category) {
+
+    switch (category) {
+
+        case "offense":
+            return "#ff4d4d";
+
+        case "defense":
+            return "#4da6ff";
+
+        case "control":
+            return "#ffd24d";
+
+        case "gear":
+            return "#4dff88";
+
+        case "mastery":
+            return "#b84dff";
+
+        case "specialization":
+            return "#ffb84d";
+
+        default:
+            return "#ffffff";
+    }
 }
 
 // =====================
