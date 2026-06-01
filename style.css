@@ -1,102 +1,85 @@
 body {
-
-    background: #111;
-
-    color: white;
-
-    font-family: Arial, sans-serif;
-
-    text-align: center;
-
     margin: 0;
-
-    padding: 20px;
-
+    font-family: Arial;
+    background: #111;
+    color: white;
 }
 
-button {
-
-    padding: 10px 20px;
-
-    margin: 10px;
-
-    cursor: pointer;
-
-}
-
-.cardContainer {
-
+/* TOP BAR */
+#topbar {
+    height: 50px;
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #333;
+    position: sticky;
+    top: 0;
+    background: #111;
+    z-index: 10;
+}
 
-    justify-content: center;
+#topButtons button {
+    margin-left: 10px;
+}
 
-    gap: 20px;
+/* LAYOUT */
+#layout {
+    display: flex;
+    height: calc(100vh - 50px);
+}
 
+/* WORLD PANEL */
+#worldPanel {
+    width: 18%;
+    overflow-y: auto;
+    border-right: 1px solid #333;
+    font-size: 12px;
+    padding: 10px;
+}
+
+.worldItem {
+    padding: 6px;
+    opacity: 0.6;
+}
+
+.worldItem.current {
+    opacity: 1;
+    font-weight: bold;
+    color: yellow;
+}
+
+/* MAIN PANEL */
+#mainPanel {
+    width: 82%;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+/* CARDS */
+.cardContainer {
+    display: flex;
     flex-wrap: wrap;
-
-    margin-top: 30px;
-
+    gap: 15px;
 }
 
 .card {
-
-    width: 220px;
-
-    min-height: 260px;
-
-    padding: 20px;
-
-    border-radius: 15px;
-
-    border: 3px solid white;
-
+    width: 200px;
+    min-height: 220px;
     background: #1a1a1a;
-
+    border-radius: 12px;
+    padding: 10px;
     cursor: pointer;
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    transition: 0.2s;
 }
 
 .card:hover {
-
     transform: scale(1.05);
-
 }
 
-.card[data-tree="Offense"] {
-
-    border-color: #ff4444;
-
-}
-
-.card[data-tree="Defense"] {
-
-    border-color: #4488ff;
-
-}
-
-.card[data-tree="Control"] {
-
-    border-color: #ffd633;
-
-}
-
-.card[data-tree="Gear"] {
-
-    border-color: #66ff99;
-
-}
-
-.card[data-tree="Mastery"] {
-
-    border-color: #bb66ff;
-
-}
-
+/* rarity glow */
 .card.rare {
     box-shadow: 0 0 12px purple;
 }
@@ -105,13 +88,9 @@ button {
     box-shadow: 0 0 18px gold;
 }
 
+/* tree */
 .tree {
     margin-top: auto;
     font-weight: bold;
-}
-
-.card[data-tree="Specialization"] {
-
-    border-color: #ff66cc;
-
+    text-align: center;
 }
