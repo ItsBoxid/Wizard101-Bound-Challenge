@@ -62,9 +62,6 @@ function loadProfiles() {
         button.textContent =
             profile.name;
 
-        button.style.display = "block";
-        button.style.margin = "10px auto";
-
         button.addEventListener("click", () => {
 
             showProfile(profile);
@@ -85,7 +82,7 @@ function showDraft(profile) {
     document.body.innerHTML = `
         <h1>Choose A Card</h1>
 
-        <div id="draftCards"></div>
+        <div id="draftCards" class="cardContainer"></div>
     `;
 
     const draftDiv =
@@ -95,22 +92,26 @@ function showDraft(profile) {
 
     draft.forEach(card => {
 
-        const button =
-            document.createElement("button");
+        const cardDiv =
+            document.createElement("div");
 
-        button.textContent =
-            card.name;
+        cardDiv.className =
+            "card";
 
-        button.style.display =
-            "block";
+        cardDiv.dataset.tree =
+            card.tree;
 
-        button.style.margin =
-            "15px auto";
+        cardDiv.innerHTML = `
+            <h3>${card.name}</h3>
 
-        button.style.padding =
-            "15px";
+            <p>${card.rarity}</p>
 
-        button.addEventListener(
+            <p>${card.tree}</p>
+
+            <p>${card.effect}</p>
+        `;
+
+        cardDiv.addEventListener(
             "click",
             () => {
 
@@ -144,7 +145,7 @@ function showDraft(profile) {
         );
 
         draftDiv.appendChild(
-            button
+            cardDiv
         );
 
     });
@@ -167,7 +168,9 @@ function showProfile(profile) {
 
         <h2>Owned Cards</h2>
 
-        <div id="ownedCards"></div>
+        <div id="ownedCards"
+             class="cardContainer">
+        </div>
 
         <button id="backButton">
             Back
@@ -189,17 +192,38 @@ function showProfile(profile) {
     } else {
 
         profile.ownedCards.forEach(
-            card => {
+            cardName => {
 
-                const p =
-                    document.createElement(
-                        "p"
+                const cardData =
+                    cards.find(
+                        c =>
+                            c.name ===
+                            cardName
                     );
 
-                p.textContent = card;
+                if (!cardData) return;
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+                card.className =
+                    "card";
+
+                card.dataset.tree =
+                    cardData.tree;
+
+                card.innerHTML = `
+                    <h3>${cardData.name}</h3>
+
+                    <p>${cardData.rarity}</p>
+
+                    <p>${cardData.tree}</p>
+                `;
 
                 ownedCardsDiv.appendChild(
-                    p
+                    card
                 );
 
             }
@@ -291,7 +315,11 @@ createButton.addEventListener(
             currentWorld:
                 "Wizard City",
 
-            ownedCards: []
+            ownedCards: [],
+
+            redraws: 0,
+
+            wish: null
 
         };
 
