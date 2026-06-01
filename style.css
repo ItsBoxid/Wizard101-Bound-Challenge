@@ -1,5 +1,34 @@
 body {
-    background: black;
+    background: #111;
     color: white;
+    font-family: Arial, sans-serif;
     text-align: center;
+}
+
+#generateBtn {
+    padding: 12px 24px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+#cards {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.card {
+    width: 220px;
+    height: 320px;
+
+    background: #222;
+
+    border-radius: 12px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 24px;
 }
