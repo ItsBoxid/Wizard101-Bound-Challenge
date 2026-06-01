@@ -56,7 +56,7 @@ function getCard(name) {
 }
 
 // =========================
-// CAPACITY CALCULATION
+// CAPACITY
 // =========================
 
 function getCapacity(profile) {
@@ -95,7 +95,7 @@ function getCapacity(profile) {
 }
 
 // =========================
-// ELIGIBILITY CHECK
+// ELIGIBILITY
 // =========================
 
 function isEligible(profile, card) {
@@ -108,7 +108,6 @@ function isEligible(profile, card) {
 
     const req = card.requirements || {};
 
-    // card dependencies
     if (req.cards) {
         for (let r of req.cards) {
             if (!profile.ownedCards.includes(r)) {
@@ -117,7 +116,6 @@ function isEligible(profile, card) {
         }
     }
 
-    // world requirement
     if (req.world) {
         const worldIndex =
             worlds.indexOf(profile.currentWorld);
@@ -128,7 +126,6 @@ function isEligible(profile, card) {
         if (worldIndex < reqIndex) return false;
     }
 
-    // capacity requirements
     if (req.bladeCapacity && cap.blades < req.bladeCapacity) return false;
     if (req.trapCapacity && cap.traps < req.trapCapacity) return false;
     if (req.shieldCapacity && cap.shields < req.shieldCapacity) return false;
@@ -143,48 +140,36 @@ function isEligible(profile, card) {
 // =========================
 
 function rarityWeight(rarity) {
-
     switch (rarity) {
-
         case "Common": return 60;
         case "Uncommon": return 25;
         case "Rare": return 10;
         case "Epic": return 4;
         case "Legendary": return 1;
-
         default: return 10;
-
     }
 }
 
 // =========================
-// RANDOM PICK (WEIGHTED)
+// DRAFT
 // =========================
 
 function weightedPick(pool) {
 
     let total = pool.reduce(
-        (sum, c) =>
-            sum + rarityWeight(c.rarity),
+        (a, c) => a + rarityWeight(c.rarity),
         0
     );
 
     let r = Math.random() * total;
 
     for (let c of pool) {
-
         r -= rarityWeight(c.rarity);
-
         if (r <= 0) return c;
-
     }
 
     return pool[0];
 }
-
-// =========================
-// DRAFT GENERATION
-// =========================
 
 function generateDraft(profile) {
 
@@ -194,13 +179,11 @@ function generateDraft(profile) {
         );
 
     const draft = [];
-
     const used = new Set();
 
     while (draft.length < 3 && eligible.length) {
 
-        const pick =
-            weightedPick(eligible);
+        const pick = weightedPick(eligible);
 
         if (used.has(pick.name)) continue;
 
@@ -212,7 +195,7 @@ function generateDraft(profile) {
 }
 
 // =========================
-// LOAD PROFILES
+// PROFILE LIST
 // =========================
 
 function loadProfiles() {
@@ -223,20 +206,50 @@ function loadProfiles() {
 
     profiles.forEach(profile => {
 
-        const button =
+        const btn =
             document.createElement("button");
 
-        button.textContent =
-            profile.name;
+        btn.textContent = profile.name;
 
-        button.addEventListener("click", () => {
-            showProfile(profile);
-        });
+        btn.onclick = () => showProfile(profile);
 
-        profilesDiv.appendChild(button);
+        profilesDiv.appendChild(btn);
 
     });
 
+}
+
+// =========================
+// CARD RENDER
+// =========================
+
+function createCardElement(card, showEffect = false) {
+
+    const div =
+        document.createElement("div");
+
+    div.className = "card";
+
+    // glow by rarity
+    if (card.rarity === "Rare") {
+        div.classList.add("rare");
+    }
+
+    if (card.rarity === "Legendary") {
+        div.classList.add("legendary");
+    }
+
+    div.dataset.tree = card.tree;
+
+    div.innerHTML = `
+        <h3>${card.name}</h3>
+
+        ${showEffect ? `<p>${card.effect}</p>` : ""}
+
+        <div class="tree">${card.tree}</div>
+    `;
+
+    return div;
 }
 
 // =========================
@@ -253,25 +266,14 @@ function showDraft(profile) {
         <div id="draftCards" class="cardContainer"></div>
     `;
 
-    const draftDiv =
+    const container =
         document.getElementById("draftCards");
 
     draft.forEach(card => {
 
-        const div =
-            document.createElement("div");
+        const el = createCardElement(card, true);
 
-        div.className = "card";
-        div.dataset.tree = card.tree;
-
-        div.innerHTML = `
-            <h3>${card.name}</h3>
-            <p>${card.rarity}</p>
-            <p>${card.tree}</p>
-            <p>${card.effect}</p>
-        `;
-
-        div.addEventListener("click", () => {
+        el.onclick = () => {
 
             const profiles = getProfiles();
 
@@ -284,11 +286,9 @@ function showDraft(profile) {
             saveProfiles(profiles);
 
             showProfile(profiles[i]);
+        };
 
-        });
-
-        draftDiv.appendChild(div);
-
+        container.appendChild(el);
     });
 
 }
@@ -309,7 +309,6 @@ function showProfile(profile) {
         <button id="completeWorld">Complete World</button>
 
         <h2>Capacity</h2>
-
         <p>Blades: ${cap.blades} / 5</p>
         <p>Traps: ${cap.traps} / 5</p>
         <p>Shields: ${cap.shields} / 6</p>
@@ -323,31 +322,21 @@ function showProfile(profile) {
         <button id="backButton">Back</button>
     `;
 
-    const owned = document.getElementById("ownedCards");
+    const container =
+        document.getElementById("ownedCards");
 
     profile.ownedCards.forEach(name => {
 
         const card = getCard(name);
         if (!card) return;
 
-        const div =
-            document.createElement("div");
-
-        div.className = "card";
-        div.dataset.tree = card.tree;
-
-        div.innerHTML = `
-            <h3>${card.name}</h3>
-            <p>${card.rarity}</p>
-            <p>${card.tree}</p>
-        `;
-
-        owned.appendChild(div);
-
+        container.appendChild(
+            createCardElement(card, true)
+        );
     });
 
     document.getElementById("completeWorld")
-        .addEventListener("click", () => {
+        .onclick = () => {
 
             const profiles = getProfiles();
 
@@ -367,12 +356,10 @@ function showProfile(profile) {
 
                 showDraft(profiles[i]);
             }
-        });
+        };
 
     document.getElementById("backButton")
-        .addEventListener("click", () => {
-            location.reload();
-        });
+        .onclick = () => location.reload();
 
 }
 
@@ -380,7 +367,7 @@ function showProfile(profile) {
 // CREATE PROFILE
 // =========================
 
-createButton.addEventListener("click", () => {
+createButton.onclick = () => {
 
     const name = profileInput.value.trim();
     if (!name) return;
@@ -402,6 +389,6 @@ createButton.addEventListener("click", () => {
     profileInput.value = "";
 
     showDraft(newProfile);
-});
+};
 
 loadProfiles();
