@@ -173,3 +173,51 @@ button:hover {
     background: #2a2a2a;
     border-color: #555;
 }
+
+
+/* =====================
+   CARD CATEGORY COLORS
+===================== */
+
+/* Offense (Red) */
+.card.offense {
+    border: 1px solid #ff4d4d;
+    box-shadow: 0 0 8px rgba(255, 77, 77, 0.25);
+}
+
+/* Defense (Blue) */
+.card.defense {
+    border: 1px solid #4da6ff;
+    box-shadow: 0 0 8px rgba(77, 166, 255, 0.25);
+}
+
+/* Control (Yellow) */
+.card.control {
+    border: 1px solid #ffd24d;
+    box-shadow: 0 0 8px rgba(255, 210, 77, 0.25);
+}
+
+/* Gear (Green) */
+.card.gear {
+    border: 1px solid #4dff88;
+    box-shadow: 0 0 8px rgba(77, 255, 136, 0.25);
+}
+
+/* Mastery (Purple) */
+.card.mastery {
+    border: 1px solid #b84dff;
+    box-shadow: 0 0 8px rgba(184, 77, 255, 0.25);
+}
+
+/* Specialization (Orange/Gold-ish) */
+.card.specialization {
+    border: 1px solid #ffb84d;
+    box-shadow: 0 0 8px rgba(255, 184, 77, 0.25);
+}
+
+/* Category label text */
+.card .category {
+    margin-top: 8px;
+    font-weight: bold;
+    text-align: center;
+}
