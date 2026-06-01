@@ -157,28 +157,48 @@ button {
 #draftOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.85);
+    width: 100vw;
+    height: 100vh;
+
+    background: radial-gradient(circle at center, rgba(0,0,0,0.7), rgba(0,0,0,0.95));
+
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+
     z-index: 9999;
 }
 
+/* remove “boxed UI” feeling */
 #draftBox {
-    width: 85%;
-    max-width: 900px;
-    padding: 20px;
-    background: #1a1a1a;
-    border-radius: 12px;
+    width: 100vw;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px;
     text-align: center;
-    box-shadow: 0 0 20px rgba(0,0,0,0.6);
+
+    background: transparent;
+    box-shadow: none;
+}
+
+#draftBox h2 {
+    font-size: 32px;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
 }
 
 #draftCards {
     display: flex;
+    gap: 25px;
     justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 /* hover feel for draft selection */
