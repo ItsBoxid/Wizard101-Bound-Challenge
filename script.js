@@ -37,6 +37,17 @@ function getProfiles() {
 
 }
 
+function getRandomCards(count) {
+
+    const shuffled =
+        [...cards].sort(
+            () => Math.random() - 0.5
+        );
+
+    return shuffled.slice(0, count);
+
+}
+
 function loadProfiles() {
 
     profilesDiv.innerHTML = "";
@@ -66,6 +77,80 @@ function loadProfiles() {
 
 }
 
+function showDraft(profile) {
+
+    const draft =
+        getRandomCards(3);
+
+    document.body.innerHTML = `
+        <h1>Choose A Card</h1>
+
+        <div id="draftCards"></div>
+    `;
+
+    const draftDiv =
+        document.getElementById(
+            "draftCards"
+        );
+
+    draft.forEach(card => {
+
+        const button =
+            document.createElement("button");
+
+        button.textContent =
+            card.name;
+
+        button.style.display =
+            "block";
+
+        button.style.margin =
+            "15px auto";
+
+        button.style.padding =
+            "15px";
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const profiles =
+                    getProfiles();
+
+                const profileIndex =
+                    profiles.findIndex(
+                        p =>
+                            p.name ===
+                            profile.name
+                    );
+
+                profiles[
+                    profileIndex
+                ].ownedCards.push(
+                    card.name
+                );
+
+                saveProfiles(
+                    profiles
+                );
+
+                showProfile(
+                    profiles[
+                        profileIndex
+                    ]
+                );
+
+            }
+        );
+
+        draftDiv.appendChild(
+            button
+        );
+
+    });
+
+}
+
 function showProfile(profile) {
 
     document.body.innerHTML = `
@@ -90,101 +175,141 @@ function showProfile(profile) {
     `;
 
     const ownedCardsDiv =
-        document.getElementById("ownedCards");
+        document.getElementById(
+            "ownedCards"
+        );
 
-    if (profile.ownedCards.length === 0) {
+    if (
+        profile.ownedCards.length === 0
+    ) {
 
         ownedCardsDiv.innerHTML =
             "<p>No cards yet.</p>";
 
     } else {
 
-        profile.ownedCards.forEach(card => {
+        profile.ownedCards.forEach(
+            card => {
 
-            const p =
-                document.createElement("p");
+                const p =
+                    document.createElement(
+                        "p"
+                    );
 
-            p.textContent = card;
+                p.textContent = card;
 
-            ownedCardsDiv.appendChild(p);
+                ownedCardsDiv.appendChild(
+                    p
+                );
 
-        });
+            }
+        );
 
     }
 
     document
-        .getElementById("completeWorld")
-        .addEventListener("click", () => {
+        .getElementById(
+            "completeWorld"
+        )
+        .addEventListener(
+            "click",
+            () => {
 
-            const profiles =
-                getProfiles();
+                const profiles =
+                    getProfiles();
 
-            const profileIndex =
-                profiles.findIndex(
-                    p => p.name === profile.name
-                );
+                const profileIndex =
+                    profiles.findIndex(
+                        p =>
+                            p.name ===
+                            profile.name
+                    );
 
-            const currentIndex =
-                worlds.indexOf(
-                    profile.currentWorld
-                );
+                const currentIndex =
+                    worlds.indexOf(
+                        profile.currentWorld
+                    );
 
-            if (
-                currentIndex <
-                worlds.length - 1
-            ) {
+                if (
+                    currentIndex <
+                    worlds.length - 1
+                ) {
 
-                profiles[
-                    profileIndex
-                ].currentWorld =
-                    worlds[currentIndex + 1];
+                    profiles[
+                        profileIndex
+                    ].currentWorld =
+                        worlds[
+                            currentIndex + 1
+                        ];
 
-                saveProfiles(profiles);
+                    saveProfiles(
+                        profiles
+                    );
 
-                showProfile(
-                    profiles[profileIndex]
-                );
+                    showDraft(
+                        profiles[
+                            profileIndex
+                        ]
+                    );
+
+                }
 
             }
-
-        });
+        );
 
     document
-        .getElementById("backButton")
-        .addEventListener("click", () => {
+        .getElementById(
+            "backButton"
+        )
+        .addEventListener(
+            "click",
+            () => {
 
-            location.reload();
+                location.reload();
 
-        });
+            }
+        );
 
 }
 
-createButton.addEventListener("click", () => {
+createButton.addEventListener(
+    "click",
+    () => {
 
-    const name =
-        profileInput.value.trim();
+        const name =
+            profileInput.value.trim();
 
-    if (name === "") return;
+        if (name === "") return;
 
-    const profiles =
-        getProfiles();
+        const profiles =
+            getProfiles();
 
-    profiles.push({
+        const newProfile = {
 
-        name: name,
+            name: name,
 
-        currentWorld: "Wizard City",
+            currentWorld:
+                "Wizard City",
 
-        ownedCards: []
+            ownedCards: []
 
-    });
+        };
 
-    saveProfiles(profiles);
+        profiles.push(
+            newProfile
+        );
 
-    profileInput.value = "";
+        saveProfiles(
+            profiles
+        );
 
-    loadProfiles();
+        profileInput.value = "";
 
-});
+        showDraft(
+            newProfile
+        );
+
+    }
+);
 
 loadProfiles();
