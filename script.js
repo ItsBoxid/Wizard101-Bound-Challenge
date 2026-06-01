@@ -48,7 +48,7 @@ function init() {
 window.onload = init;
 
 // =====================
-// PROFILE MENU
+// PROFILE SELECT MENU
 // =====================
 
 function showProfileSelect(profiles) {
@@ -140,7 +140,7 @@ function startGame(profile) {
 }
 
 // =====================
-// WORLD SYSTEM
+// WORLD RENDER
 // =====================
 
 function renderWorlds() {
@@ -168,15 +168,13 @@ function renderWorlds() {
 
         if (!target) return;
 
-        target.scrollIntoView({
-            block: "center"
-        });
+        target.scrollIntoView({ block: "center" });
 
     }, 50);
 }
 
 // =====================
-// WORLD COMPLETE → DRAFT SYSTEM
+// COMPLETE WORLD → DRAFT
 // =====================
 
 function completeWorld() {
@@ -194,52 +192,12 @@ function completeWorld() {
         currentProfile = profiles[idx];
 
         renderWorlds();
-        showCardDraft();
+        showCardDraft(); // IMPORTANT
     }
 }
 
 // =====================
-// CARD DRAFT SYSTEM (KEY FEATURE)
-// =====================
-
-function showCardDraft() {
-
-    const panel = document.getElementById("mainPanel");
-
-    panel.innerHTML = `
-        <h2>Choose Your Reward</h2>
-        <div id="draftCards"></div>
-    `;
-
-    const draft = document.getElementById("draftCards");
-
-    const pool = (typeof cards !== "undefined")
-        ? [...cards].sort(() => 0.5 - Math.random()).slice(0, 3)
-        : [];
-
-    pool.forEach(c => {
-
-        const el = makeCard(c);
-
-        el.onclick = () => {
-
-            currentProfile.ownedCards.push(c.name);
-
-            const profiles = getProfiles();
-            const idx = profiles.findIndex(p => p.name === currentProfile.name);
-
-            profiles[idx] = currentProfile;
-            saveProfiles(profiles);
-
-            renderCards();
-        };
-
-        draft.appendChild(el);
-    });
-}
-
-// =====================
-// SAFE CARD LOOKUP
+// CARD LOOKUP SAFE
 // =====================
 
 function findCard(name) {
@@ -264,7 +222,7 @@ function getTreeColor(tree) {
 }
 
 // =====================
-// CARD RENDER
+// CARD UI
 // =====================
 
 function makeCard(card) {
@@ -287,7 +245,7 @@ function makeCard(card) {
 }
 
 // =====================
-// CARDS VIEW
+// MAIN VIEW
 // =====================
 
 function renderCards() {
@@ -326,6 +284,54 @@ function renderIndex() {
     }
 
     panel.appendChild(container);
+}
+
+// =====================
+// DRAFT SYSTEM (FULLSCREEN MODAL)
+// =====================
+
+function showCardDraft() {
+
+    const overlay = document.createElement("div");
+    overlay.id = "draftOverlay";
+
+    overlay.innerHTML = `
+        <div id="draftBox">
+            <h2>Choose Your Reward</h2>
+            <div id="draftCards"></div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const draft = document.getElementById("draftCards");
+
+    const pool = (typeof cards !== "undefined")
+        ? [...cards].sort(() => 0.5 - Math.random()).slice(0, 3)
+        : [];
+
+    pool.forEach(c => {
+
+        const el = makeCard(c);
+        el.classList.add("draftCard");
+
+        el.onclick = () => {
+
+            currentProfile.ownedCards.push(c.name);
+
+            const profiles = getProfiles();
+            const idx = profiles.findIndex(p => p.name === currentProfile.name);
+
+            profiles[idx] = currentProfile;
+            saveProfiles(profiles);
+
+            overlay.remove();
+
+            renderCards();
+        };
+
+        draft.appendChild(el);
+    });
 }
 
 // =====================
