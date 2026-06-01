@@ -11,6 +11,10 @@ const worlds = [
     "Khrysalis"
 ];
 
+// =====================
+// STATE
+// =====================
+
 let currentProfile = null;
 
 // =====================
@@ -34,7 +38,7 @@ function init() {
     const profiles = getProfiles();
 
     if (profiles.length === 0) {
-        showCreateScreen();
+        showProfileSelect([]);
         return;
     }
 
@@ -50,7 +54,7 @@ window.onload = init;
 function showProfileSelect(profiles) {
 
     document.body.innerHTML = `
-        <div style="padding:20px">
+        <div style="padding:20px; font-family:Arial;">
             <h1>Select Profile</h1>
             <button id="createBtn">Create Profile</button>
             <div id="list"></div>
@@ -103,9 +107,7 @@ function startGame(profile) {
     <div id="app">
 
         <div id="topbar">
-            <div>
-                <div id="charName"></div>
-            </div>
+            <div id="charName"></div>
 
             <div>
                 <button id="cardsBtn">Cards</button>
@@ -117,8 +119,10 @@ function startGame(profile) {
         <div id="layout">
 
             <div id="worldPanel">
-                <div class="worldList"></div>
-                <button id="completeWorldBtn">Complete World</button>
+                <div id="worldList"></div>
+                <div id="worldFooter">
+                    <button id="completeWorldBtn">Complete World</button>
+                </div>
             </div>
 
             <div id="mainPanel"></div>
@@ -136,22 +140,22 @@ function startGame(profile) {
 }
 
 // =====================
-// WORLDS
+// WORLD SYSTEM
 // =====================
 
 function renderWorlds() {
 
-    const list = document.querySelector(".worldList");
+    const list = document.getElementById("worldList");
     list.innerHTML = "";
 
-    const idx = worlds.indexOf(currentProfile.currentWorld);
+    const currentIndex = worlds.indexOf(currentProfile.currentWorld);
 
     worlds.forEach((w, i) => {
 
         const div = document.createElement("div");
         div.className = "worldItem";
 
-        if (i === idx) div.classList.add("current");
+        if (i === currentIndex) div.classList.add("current");
 
         div.textContent = w;
         list.appendChild(div);
@@ -160,7 +164,7 @@ function renderWorlds() {
     setTimeout(() => {
 
         const items = document.querySelectorAll(".worldItem");
-        const target = items[idx];
+        const target = items[currentIndex];
 
         if (!target) return;
 
@@ -172,7 +176,7 @@ function renderWorlds() {
 }
 
 // =====================
-// WORLD COMPLETE
+// WORLD COMPLETE → DRAFT SYSTEM
 // =====================
 
 function completeWorld() {
@@ -183,15 +187,59 @@ function completeWorld() {
     const worldIndex = worlds.indexOf(currentProfile.currentWorld);
 
     if (worldIndex < worlds.length - 1) {
+
         profiles[idx].currentWorld = worlds[worldIndex + 1];
         saveProfiles(profiles);
+
         currentProfile = profiles[idx];
+
         renderWorlds();
+        showCardDraft();
     }
 }
 
 // =====================
-// CARDS SAFE LOOKUP
+// CARD DRAFT SYSTEM (KEY FEATURE)
+// =====================
+
+function showCardDraft() {
+
+    const panel = document.getElementById("mainPanel");
+
+    panel.innerHTML = `
+        <h2>Choose Your Reward</h2>
+        <div id="draftCards"></div>
+    `;
+
+    const draft = document.getElementById("draftCards");
+
+    const pool = (typeof cards !== "undefined")
+        ? [...cards].sort(() => 0.5 - Math.random()).slice(0, 3)
+        : [];
+
+    pool.forEach(c => {
+
+        const el = makeCard(c);
+
+        el.onclick = () => {
+
+            currentProfile.ownedCards.push(c.name);
+
+            const profiles = getProfiles();
+            const idx = profiles.findIndex(p => p.name === currentProfile.name);
+
+            profiles[idx] = currentProfile;
+            saveProfiles(profiles);
+
+            renderCards();
+        };
+
+        draft.appendChild(el);
+    });
+}
+
+// =====================
+// SAFE CARD LOOKUP
 // =====================
 
 function findCard(name) {
@@ -200,7 +248,7 @@ function findCard(name) {
 }
 
 // =====================
-// TREE COLOR
+// TREE COLORS
 // =====================
 
 function getTreeColor(tree) {
@@ -216,7 +264,7 @@ function getTreeColor(tree) {
 }
 
 // =====================
-// CARD UI
+// CARD RENDER
 // =====================
 
 function makeCard(card) {
@@ -239,7 +287,7 @@ function makeCard(card) {
 }
 
 // =====================
-// CARDS
+// CARDS VIEW
 // =====================
 
 function renderCards() {
@@ -262,18 +310,20 @@ function renderCards() {
 }
 
 // =====================
-// INDEX
+// INDEX VIEW
 // =====================
 
 function renderIndex() {
 
     const panel = document.getElementById("mainPanel");
-    panel.innerHTML = "";
+    panel.innerHTML = "<h2>Card Index</h2>";
 
     const container = document.createElement("div");
     container.className = "cardContainer";
 
-    cards.forEach(c => container.appendChild(makeCard(c)));
+    if (typeof cards !== "undefined") {
+        cards.forEach(c => container.appendChild(makeCard(c)));
+    }
 
     panel.appendChild(container);
 }
