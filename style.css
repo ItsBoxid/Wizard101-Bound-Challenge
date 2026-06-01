@@ -1,44 +1,64 @@
+
+/* =========================
+   GLOBAL
+========================= */
+
 body {
     margin: 0;
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     background: #111;
     color: white;
 }
 
-/* TOP BAR */
+/* =========================
+   TOP BAR
+========================= */
+
 #topbar {
     height: 55px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 15px;
+    padding: 0 15px;
     border-bottom: 1px solid #333;
     background: #111;
     position: sticky;
     top: 0;
+    z-index: 100;
 }
+
+/* =========================
+   MAIN LAYOUT
+========================= */
 
 #layout {
     display: flex;
     height: calc(100vh - 55px);
 }
 
-/* WORLD PANEL */
+/* =========================
+   WORLD PANEL (FIXED)
+========================= */
+
 #worldPanel {
-    width: 140px;
-    min-width: 140px;
+    width: 150px;
+    min-width: 150px;
     border-right: 1px solid #333;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    overflow: hidden; /* IMPORTANT: prevents bleed into topbar */
+}
+
+/* scroll area only */
+#worldList {
+    flex: 1;
+    overflow-y: auto;
     padding: 8px;
     font-size: 13px;
 }
 
-.worldList {
-    flex: 1;
-    overflow-y: auto;
-}
-
+/* world entries */
 .worldItem {
     padding: 6px 4px;
     opacity: 0.6;
@@ -51,27 +71,40 @@ body {
     color: #ffd54a;
 }
 
+/* footer button always visible */
+#worldFooter {
+    padding: 8px;
+    border-top: 1px solid #333;
+    background: #111;
+}
+
 #completeWorldBtn {
     width: 100%;
-    margin-top: 8px;
     padding: 6px;
     cursor: pointer;
 }
 
-/* MAIN PANEL */
+/* =========================
+   MAIN PANEL
+========================= */
+
 #mainPanel {
     flex: 1;
     overflow-y: auto;
     padding: 15px;
 }
 
-/* CARDS */
+/* =========================
+   CARDS
+========================= */
+
 .cardContainer {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
 }
 
+/* base card */
 .card {
     width: 200px;
     min-height: 220px;
@@ -80,15 +113,16 @@ body {
     padding: 10px;
     display: flex;
     flex-direction: column;
-    transition: 0.15s;
+    transition: 0.15s ease;
     cursor: default;
 }
 
+/* hover effect */
 .card:hover {
     transform: scale(1.04);
 }
 
-/* rarity */
+/* rarity glow */
 .card.rare {
     box-shadow: 0 0 10px purple;
 }
@@ -97,14 +131,63 @@ body {
     box-shadow: 0 0 14px gold;
 }
 
-/* tree */
+/* tree label */
 .tree {
     margin-top: auto;
     text-align: center;
     font-weight: bold;
 }
 
-/* cursor fix */
+/* =========================
+   CURSOR FIXES
+========================= */
+
 button {
     cursor: pointer;
+}
+
+.draftCard {
+    cursor: pointer;
+}
+
+/* =========================
+   DRAFT OVERLAY (FULLSCREEN MODAL)
+========================= */
+
+#draftOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+#draftBox {
+    width: 85%;
+    max-width: 900px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.6);
+}
+
+#draftCards {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* hover feel for draft selection */
+.draftCard {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.draftCard:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 15px rgba(255,255,255,0.2);
 }
