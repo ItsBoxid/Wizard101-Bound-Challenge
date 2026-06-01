@@ -16,10 +16,10 @@ const worlds = [
 // =====================
 
 let currentProfile = null;
-let viewMode = "cards"; // cards | index
+let viewMode = "cards";
 
 // =====================
-// LOAD/SAVE
+// LOAD / SAVE
 // =====================
 
 function getProfiles() {
@@ -31,7 +31,7 @@ function saveProfiles(p) {
 }
 
 // =====================
-// INIT (TEMP PROFILE SELECT)
+// INIT
 // =====================
 
 function init() {
@@ -78,7 +78,6 @@ function renderWorlds() {
         panel.appendChild(div);
     });
 
-    // auto-scroll positioning
     setTimeout(() => {
 
         const items =
@@ -98,7 +97,21 @@ function renderWorlds() {
 }
 
 // =====================
-// CAPACITY (simple placeholder)
+// SAFE CARD LOOKUP (IMPORTANT FIX)
+// =====================
+
+function findCardByName(name) {
+
+    if (typeof cards === "undefined") {
+        console.error("cards.js not loaded!");
+        return null;
+    }
+
+    return cards.find(c => c.name === name) || null;
+}
+
+// =====================
+// CAPACITY
 // =====================
 
 function getCapacity(profile) {
@@ -112,7 +125,7 @@ function getCapacity(profile) {
 
     profile.ownedCards.forEach(name => {
 
-        const c = cards.find(x => x.name === name);
+        const c = findCardByName(name);
         if (!c) return;
 
         if (c.name.includes("Blade")) blades++;
@@ -127,7 +140,7 @@ function getCapacity(profile) {
 }
 
 // =====================
-// CARD RENDER
+// CARD UI
 // =====================
 
 function makeCard(card) {
@@ -178,7 +191,7 @@ function renderCards() {
 
     currentProfile.ownedCards.forEach(name => {
 
-        const card = cards.find(c => c.name === name);
+        const card = findCardByName(name);
         if (!card) return;
 
         container.appendChild(makeCard(card));
@@ -188,7 +201,7 @@ function renderCards() {
 }
 
 // =====================
-// CARD INDEX VIEW
+// INDEX VIEW
 // =====================
 
 function renderIndex() {
@@ -199,9 +212,15 @@ function renderIndex() {
     const container = document.createElement("div");
     container.className = "cardContainer";
 
-    cards.forEach(c => {
-        container.appendChild(makeCard(c));
-    });
+    if (typeof cards !== "undefined") {
+
+        cards.forEach(c => {
+            container.appendChild(makeCard(c));
+        });
+
+    } else {
+        panel.innerHTML += "<p>cards.js failed to load</p>";
+    }
 
     panel.appendChild(container);
 }
@@ -212,24 +231,18 @@ function renderIndex() {
 
 function setupButtons() {
 
-    document.getElementById("cardIndexBtn")
-        .onclick = () => {
+    document.getElementById("cardIndexBtn").onclick = () => {
+        viewMode = "index";
+        renderIndex();
+    };
 
-            viewMode = "index";
-            renderIndex();
-
-        };
-
-    document.getElementById("settingsBtn")
-        .onclick = () => {
-
-            alert("Settings placeholder (export/delete coming next)");
-
-        };
+    document.getElementById("settingsBtn").onclick = () => {
+        alert("Settings coming next (export/delete profiles)");
+    };
 }
 
 // =====================
-// START
+// START SAFELY
 // =====================
 
-init();
+window.onload = init;
