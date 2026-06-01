@@ -108,13 +108,20 @@ body {
 .card {
     width: 200px;
     min-height: 220px;
+
     background: #1a1a1a;
     border-radius: 12px;
     padding: 10px;
+
     display: flex;
     flex-direction: column;
+
     transition: 0.15s ease;
+
     cursor: default;
+
+    /* 🔥 THIS IS WHAT YOU'RE MISSING */
+    border: 1px solid rgba(255,255,255,0.08);
 }
 
 /* hover effect */
