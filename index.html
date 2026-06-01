@@ -1,32 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Wizard101 Challenge Tracker</title>
+    <title>Roguelike Challenge</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <h1>Wizard101 Challenge Tracker</h1>
+<div id="app">
 
-    <div id="profileMenu">
+    <!-- TOP BAR -->
+    <div id="topbar">
+        <div id="charName">Character</div>
 
-        <input
-            type="text"
-            id="profileName"
-            placeholder="Profile Name">
+        <div id="topButtons">
+            <button id="cardIndexBtn">Cards</button>
+            <button id="settingsBtn">Settings</button>
+        </div>
+    </div>
 
-        <button id="createProfile">
-            Create Profile
-        </button>
+    <!-- MAIN LAYOUT -->
+    <div id="layout">
+
+        <!-- WORLD PANEL -->
+        <div id="worldPanel"></div>
+
+        <!-- MAIN PANEL -->
+        <div id="mainPanel"></div>
 
     </div>
 
-    <h2>Saved Profiles</h2>
+</div>
 
-    <div id="profiles"></div>
-
-     <script src="cards.js"></script>
-    <script src="script.js"></script>
+<script src="cards.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
