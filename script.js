@@ -11,10 +11,6 @@ const worlds = [
     "Khrysalis"
 ];
 
-// =====================
-// STATE
-// =====================
-
 let currentProfile = null;
 
 // =====================
@@ -30,7 +26,7 @@ function saveProfiles(p) {
 }
 
 // =====================
-// INIT (ENTRY POINT)
+// INIT
 // =====================
 
 function init() {
@@ -48,31 +44,29 @@ function init() {
 window.onload = init;
 
 // =====================
-// PROFILE MENU SCREEN
+// PROFILE MENU
 // =====================
 
 function showProfileSelect(profiles) {
 
     document.body.innerHTML = `
-        <div style="padding:20px; color:white; font-family:Arial;">
+        <div style="padding:20px">
             <h1>Select Profile</h1>
-            <button id="createBtn">Create New Profile</button>
+            <button id="createBtn">Create Profile</button>
             <div id="list"></div>
         </div>
     `;
 
     const list = document.getElementById("list");
 
-    profiles.forEach((p, index) => {
+    profiles.forEach(p => {
 
         const btn = document.createElement("button");
         btn.textContent = p.name;
         btn.style.display = "block";
         btn.style.margin = "10px 0";
 
-        btn.onclick = () => {
-            startGame(p);
-        };
+        btn.onclick = () => startGame(p);
 
         list.appendChild(btn);
     });
@@ -109,17 +103,26 @@ function startGame(profile) {
     <div id="app">
 
         <div id="topbar">
-            <div id="charName"></div>
+            <div>
+                <div id="charName"></div>
+            </div>
 
             <div>
-                <button id="cardIndexBtn">Cards</button>
-                <button id="settingsBtn">Settings</button>
+                <button id="cardsBtn">Cards</button>
+                <button id="indexBtn">Index</button>
+                <button id="menuBtn">Menu</button>
             </div>
         </div>
 
         <div id="layout">
-            <div id="worldPanel"></div>
+
+            <div id="worldPanel">
+                <div class="worldList"></div>
+                <button id="completeWorldBtn">Complete World</button>
+            </div>
+
             <div id="mainPanel"></div>
+
         </div>
 
     </div>
@@ -127,96 +130,93 @@ function startGame(profile) {
 
     document.getElementById("charName").textContent = profile.name;
 
+    setupButtons();
     renderWorlds();
     renderCards();
-    setupButtons();
 }
 
 // =====================
-// WORLD PANEL
+// WORLDS
 // =====================
 
 function renderWorlds() {
 
-    const panel = document.getElementById("worldPanel");
-    panel.innerHTML = "";
+    const list = document.querySelector(".worldList");
+    list.innerHTML = "";
 
-    const currentIndex =
-        worlds.indexOf(currentProfile.currentWorld);
+    const idx = worlds.indexOf(currentProfile.currentWorld);
 
     worlds.forEach((w, i) => {
 
         const div = document.createElement("div");
         div.className = "worldItem";
 
-        if (i === currentIndex) {
-            div.classList.add("current");
-        }
+        if (i === idx) div.classList.add("current");
 
         div.textContent = w;
-        panel.appendChild(div);
+        list.appendChild(div);
     });
 
     setTimeout(() => {
 
-        const items =
-            document.querySelectorAll(".worldItem");
+        const items = document.querySelectorAll(".worldItem");
+        const target = items[idx];
 
-        const target = items[currentIndex];
         if (!target) return;
 
         target.scrollIntoView({
-            block:
-                currentIndex > worlds.length - 3
-                    ? "end"
-                    : "center"
+            block: "center"
         });
 
     }, 50);
 }
 
 // =====================
-// SAFE CARD LOOKUP
+// WORLD COMPLETE
+// =====================
+
+function completeWorld() {
+
+    const profiles = getProfiles();
+    const idx = profiles.findIndex(p => p.name === currentProfile.name);
+
+    const worldIndex = worlds.indexOf(currentProfile.currentWorld);
+
+    if (worldIndex < worlds.length - 1) {
+        profiles[idx].currentWorld = worlds[worldIndex + 1];
+        saveProfiles(profiles);
+        currentProfile = profiles[idx];
+        renderWorlds();
+    }
+}
+
+// =====================
+// CARDS SAFE LOOKUP
 // =====================
 
 function findCard(name) {
-
     if (typeof cards === "undefined") return null;
-
     return cards.find(c => c.name === name) || null;
 }
 
 // =====================
-// CAPACITY
+// TREE COLOR
 // =====================
 
-function getCapacity(profile) {
+function getTreeColor(tree) {
 
-    let blades = 0;
-    let shields = 0;
-    let traps = 0;
-    let heals = 0;
-    let weaknesses = 0;
-    let feints = 0;
-
-    profile.ownedCards.forEach(name => {
-
-        const c = findCard(name);
-        if (!c) return;
-
-        if (c.name.includes("Blade")) blades++;
-        if (c.name.includes("Shield")) shields++;
-        if (c.name.includes("Trap")) traps++;
-        if (c.name.includes("Heal")) heals++;
-        if (c.name.includes("Weakness")) weaknesses++;
-        if (c.name.includes("Feint")) feints++;
-    });
-
-    return { blades, shields, traps, heals, weaknesses, feints };
+    switch(tree) {
+        case "Offense": return "#ff4d4d";
+        case "Defense": return "#4da6ff";
+        case "Control": return "#4dff88";
+        case "Gear": return "#ffd24d";
+        case "Mastery": return "#c266ff";
+        default: return "white";
+    }
 }
 
 // =====================
-// CARDS
+// CARD UI
 // =====================
 
 function makeCard(card) {
@@ -230,37 +230,22 @@ function makeCard(card) {
     div.innerHTML = `
         <h3>${card.name}</h3>
         <p>${card.effect}</p>
-        <div class="tree">${card.tree}</div>
+        <div class="tree" style="color:${getTreeColor(card.tree)}">
+            ${card.tree}
+        </div>
     `;
 
     return div;
 }
 
 // =====================
-// MAIN VIEW
+// CARDS
 // =====================
 
 function renderCards() {
 
     const panel = document.getElementById("mainPanel");
     panel.innerHTML = "";
-
-    const cap = getCapacity(currentProfile);
-
-    const header = document.createElement("div");
-    header.innerHTML = `
-        <h2>Capacity</h2>
-        <p>Blades: ${cap.blades}</p>
-        <p>Shields: ${cap.shields}</p>
-        <p>Traps: ${cap.traps}</p>
-        <p>Heals: ${cap.heals}</p>
-        <p>Weaknesses: ${cap.weaknesses}</p>
-        <p>Feints: ${cap.feints}</p>
-        <hr>
-        <h2>Owned Cards</h2>
-    `;
-
-    panel.appendChild(header);
 
     const container = document.createElement("div");
     container.className = "cardContainer";
@@ -277,33 +262,33 @@ function renderCards() {
 }
 
 // =====================
+// INDEX
+// =====================
+
+function renderIndex() {
+
+    const panel = document.getElementById("mainPanel");
+    panel.innerHTML = "";
+
+    const container = document.createElement("div");
+    container.className = "cardContainer";
+
+    cards.forEach(c => container.appendChild(makeCard(c)));
+
+    panel.appendChild(container);
+}
+
+// =====================
 // BUTTONS
 // =====================
 
 function setupButtons() {
 
-    document.getElementById("cardIndexBtn").onclick = () => {
+    document.getElementById("cardsBtn").onclick = () => renderCards();
 
-        const panel = document.getElementById("mainPanel");
+    document.getElementById("indexBtn").onclick = () => renderIndex();
 
-        if (typeof cards === "undefined") {
-            panel.innerHTML = "<p>Cards not loaded</p>";
-            return;
-        }
+    document.getElementById("menuBtn").onclick = () => location.reload();
 
-        panel.innerHTML = "<h2>Card Index</h2>";
-
-        const container = document.createElement("div");
-        container.className = "cardContainer";
-
-        cards.forEach(c => {
-            container.appendChild(makeCard(c));
-        });
-
-        panel.appendChild(container);
-    };
-
-    document.getElementById("settingsBtn").onclick = () => {
-        alert("Settings coming soon");
-    };
+    document.getElementById("completeWorldBtn").onclick = () => completeWorld();
 }
