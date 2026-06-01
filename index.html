@@ -1,18 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Wizard101 Card Challenge</title>
+    <title>Wizard101 Challenge Tracker</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>Wizard101 Card Challenge</h1>
+    <h1>Wizard101 Challenge Tracker</h1>
 
-    <button id="generateBtn">
-        Generate Cards
-    </button>
+    <div id="profileMenu">
 
-    <div id="cards"></div>
+        <input
+            type="text"
+            id="profileName"
+            placeholder="Profile Name">
+
+        <button id="createProfile">
+            Create Profile
+        </button>
+
+    </div>
+
+    <h2>Saved Profiles</h2>
+
+    <div id="profiles"></div>
 
     <script src="script.js"></script>
 
