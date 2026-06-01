@@ -1,131 +1,199 @@
+const worlds = [
+"Wizard City",
+"Krokotopia",
+"Marleybone",
+"Mooshu",
+"Dragonspyre",
+"Celestia",
+"Zafaria",
+"Avalon",
+"Azteca",
+"Khrysalis"
+];
+
 const createButton =
-    document.getElementById("createProfile");
+document.getElementById("createProfile");
 
 const profileInput =
-    document.getElementById("profileName");
+document.getElementById("profileName");
 
 const profilesDiv =
-    document.getElementById("profiles");
+document.getElementById("profiles");
+
+function saveProfiles(profiles) {
+
+```
+localStorage.setItem(
+    "profiles",
+    JSON.stringify(profiles)
+);
+```
+
+}
+
+function getProfiles() {
+
+```
+return JSON.parse(
+    localStorage.getItem("profiles")
+) || [];
+```
+
+}
 
 function loadProfiles() {
 
-    profilesDiv.innerHTML = "";
+```
+profilesDiv.innerHTML = "";
 
-    const profiles =
-        JSON.parse(
-            localStorage.getItem("profiles")
-        ) || [];
+const profiles = getProfiles();
 
-    profiles.forEach(profile => {
+profiles.forEach(profile => {
 
-        const button =
-            document.createElement("button");
+    const button =
+        document.createElement("button");
 
-        button.textContent =
-            profile.name;
+    button.textContent =
+        profile.name;
 
-        button.style.display = "block";
-        button.style.margin = "10px auto";
+    button.style.display = "block";
+    button.style.margin = "10px auto";
 
-        button.addEventListener("click", () => {
+    button.addEventListener("click", () => {
 
-            localStorage.setItem(
-                "activeProfile",
-                profile.name
-            );
-
-            showProfile(profile);
-
-        });
-
-        profilesDiv.appendChild(button);
+        showProfile(profile);
 
     });
+
+    profilesDiv.appendChild(button);
+
+});
+```
 
 }
 
 function showProfile(profile) {
 
-    document.body.innerHTML = `
-        <h1>${profile.name}</h1>
+```
+document.body.innerHTML = `
+    <h1>${profile.name}</h1>
 
-        <h2>
-            Current World:
-            ${profile.currentWorld}
-        </h2>
+    <h2>
+        Current World:
+        ${profile.currentWorld}
+    </h2>
 
-        <h2>Owned Cards</h2>
+    <button id="completeWorld">
+        Complete World
+    </button>
 
-        <div id="ownedCards"></div>
+    <h2>Owned Cards</h2>
 
-        <button id="backButton">
-            Back
-        </button>
-    `;
+    <div id="ownedCards"></div>
 
-    const ownedCardsDiv =
-        document.getElementById("ownedCards");
+    <button id="backButton">
+        Back
+    </button>
+`;
 
-    if (profile.ownedCards.length === 0) {
+const ownedCardsDiv =
+    document.getElementById("ownedCards");
 
-        ownedCardsDiv.innerHTML =
-            "<p>No cards yet.</p>";
+if (profile.ownedCards.length === 0) {
 
-    } else {
+    ownedCardsDiv.innerHTML =
+        "<p>No cards yet.</p>";
 
-        profile.ownedCards.forEach(card => {
+} else {
 
-            const p =
-                document.createElement("p");
+    profile.ownedCards.forEach(card => {
 
-            p.textContent = card;
+        const p =
+            document.createElement("p");
 
-            ownedCardsDiv.appendChild(p);
+        p.textContent = card;
 
-        });
+        ownedCardsDiv.appendChild(p);
 
-    }
+    });
 
-    document
-        .getElementById("backButton")
-        .addEventListener("click", () => {
+}
 
-            location.reload();
+document
+    .getElementById("completeWorld")
+    .addEventListener("click", () => {
 
-        });
+        const profiles =
+            getProfiles();
+
+        const profileIndex =
+            profiles.findIndex(
+                p => p.name === profile.name
+            );
+
+        const currentIndex =
+            worlds.indexOf(
+                profile.currentWorld
+            );
+
+        if (
+            currentIndex <
+            worlds.length - 1
+        ) {
+
+            profiles[
+                profileIndex
+            ].currentWorld =
+                worlds[currentIndex + 1];
+
+            saveProfiles(profiles);
+
+            showProfile(
+                profiles[profileIndex]
+            );
+
+        }
+
+    });
+
+document
+    .getElementById("backButton")
+    .addEventListener("click", () => {
+
+        location.reload();
+
+    });
+```
 
 }
 
 createButton.addEventListener("click", () => {
 
-    const name =
-        profileInput.value.trim();
+```
+const name =
+    profileInput.value.trim();
 
-    if (name === "") return;
+if (name === "") return;
 
-    const profiles =
-        JSON.parse(
-            localStorage.getItem("profiles")
-        ) || [];
+const profiles =
+    getProfiles();
 
-    profiles.push({
+profiles.push({
 
-        name: name,
+    name: name,
 
-        currentWorld: "Wizard City",
+    currentWorld: "Wizard City",
 
-        ownedCards: []
+    ownedCards: []
 
-    });
+});
 
-    localStorage.setItem(
-        "profiles",
-        JSON.stringify(profiles)
-    );
+saveProfiles(profiles);
 
-    profileInput.value = "";
+profileInput.value = "";
 
-    loadProfiles();
+loadProfiles();
+```
 
 });
 
