@@ -1,79 +1,69 @@
-const cards = [
-    {
-        name: "Blades I",
-        tree: "Offense",
-        color: "#d94a4a"
-    },
+const createButton =
+    document.getElementById("createProfile");
 
-    {
-        name: "Healer I",
-        tree: "Defense",
-        color: "#4a7fd9"
-    },
+const profileInput =
+    document.getElementById("profileName");
 
-    {
-        name: "Cross-Trained",
-        tree: "Control",
-        color: "#d9c54a"
-    },
+const profilesDiv =
+    document.getElementById("profiles");
 
-    {
-        name: "Spell Caster",
-        tree: "Gear",
-        color: "#4ad96f"
-    },
+function loadProfiles() {
 
-    {
-        name: "Traps I",
-        tree: "Offense",
-        color: "#d94a4a"
-    },
+    profilesDiv.innerHTML = "";
 
-    {
-        name: "Shields I",
-        tree: "Defense",
-        color: "#4a7fd9"
-    },
+    const profiles =
+        JSON.parse(
+            localStorage.getItem("profiles")
+        ) || [];
 
-    {
-        name: "Card Collector",
-        tree: "Control",
-        color: "#d9c54a"
-    },
+    profiles.forEach(profile => {
 
-    {
-        name: "Minion Friend",
-        tree: "Control",
-        color: "#d9c54a"
-    }
-];
+        const button =
+            document.createElement("button");
 
-const generateBtn = document.getElementById("generateBtn");
-const cardsContainer = document.getElementById("cards");
+        button.textContent =
+            profile.name;
 
-generateBtn.addEventListener("click", () => {
+        button.style.display = "block";
+        button.style.margin = "10px auto";
 
-    cardsContainer.innerHTML = "";
-
-    const shuffled = [...cards].sort(() => Math.random() - 0.5);
-
-    const selected = shuffled.slice(0, 3);
-
-    selected.forEach(cardData => {
-
-        const card = document.createElement("div");
-
-        card.classList.add("card");
-
-        card.style.border = `4px solid ${cardData.color}`;
-
-        card.innerHTML = `
-            <h2>${cardData.name}</h2>
-            <p>${cardData.tree}</p>
-        `;
-
-        cardsContainer.appendChild(card);
+        profilesDiv.appendChild(button);
 
     });
 
+}
+
+createButton.addEventListener("click", () => {
+
+    const name =
+        profileInput.value.trim();
+
+    if (name === "") return;
+
+    const profiles =
+        JSON.parse(
+            localStorage.getItem("profiles")
+        ) || [];
+
+    profiles.push({
+
+        name: name,
+
+        currentWorld: "Wizard City",
+
+        ownedCards: []
+
+    });
+
+    localStorage.setItem(
+        "profiles",
+        JSON.stringify(profiles)
+    );
+
+    profileInput.value = "";
+
+    loadProfiles();
+
 });
+
+loadProfiles();
