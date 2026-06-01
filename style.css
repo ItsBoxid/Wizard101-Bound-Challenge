@@ -97,6 +97,19 @@ button {
 
 }
 
+.card.rare {
+    box-shadow: 0 0 12px purple;
+}
+
+.card.legendary {
+    box-shadow: 0 0 18px gold;
+}
+
+.tree {
+    margin-top: auto;
+    font-weight: bold;
+}
+
 .card[data-tree="Specialization"] {
 
     border-color: #ff66cc;
