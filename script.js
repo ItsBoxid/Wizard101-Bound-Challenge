@@ -1,3 +1,8 @@
+
+// =====================
+// DATA
+// =====================
+
 const worlds = [
     "Wizard City",
     "Krokotopia",
@@ -12,10 +17,13 @@ const worlds = [
 ];
 
 // =====================
-// STATE
+// STATE (V3 CORE)
 // =====================
 
-let currentProfile = null;
+const STATE = {
+    mode: "MENU", // MENU | GAME | DRAFT
+    profile: null
+};
 
 // =====================
 // STORAGE
@@ -30,54 +38,36 @@ function saveProfiles(p) {
 }
 
 // =====================
-// INIT
+// BOOT
 // =====================
 
-function init() {
+window.onload = () => {
+    renderMenu();
+};
+
+// =====================
+// MENU
+// =====================
+
+function renderMenu() {
+
+    STATE.mode = "MENU";
 
     const profiles = getProfiles();
 
-    if (profiles.length === 0) {
-        showProfileSelect([]);
-        return;
-    }
+    const app = document.getElementById("app");
 
-    showProfileSelect(profiles);
-}
-
-window.onload = init;
-
-// =====================
-// PROFILE SELECT MENU
-// =====================
-
-function showProfileSelect(profiles) {
-
-    document.body.innerHTML = `
-        <div style="padding:20px; font-family:Arial;">
-            <h1>Select Profile</h1>
-            <button id="createBtn">Create Profile</button>
+    app.innerHTML = `
+        <div style="padding:20px">
+            <h1>Profiles</h1>
+            <button id="create">Create</button>
             <div id="list"></div>
         </div>
     `;
 
-    const list = document.getElementById("list");
+    document.getElementById("create").onclick = () => {
 
-    profiles.forEach(p => {
-
-        const btn = document.createElement("button");
-        btn.textContent = p.name;
-        btn.style.display = "block";
-        btn.style.margin = "10px 0";
-
-        btn.onclick = () => startGame(p);
-
-        list.appendChild(btn);
-    });
-
-    document.getElementById("createBtn").onclick = () => {
-
-        const name = prompt("Character Name:");
+        const name = prompt("Character Name");
         if (!name) return;
 
         const profiles = getProfiles();
@@ -91,24 +81,38 @@ function showProfileSelect(profiles) {
         profiles.push(newProfile);
         saveProfiles(profiles);
 
-        startGame(newProfile);
+        renderMenu();
     };
+
+    const list = document.getElementById("list");
+
+    profiles.forEach(p => {
+
+        const btn = document.createElement("button");
+        btn.textContent = p.name;
+
+        btn.onclick = () => {
+            STATE.profile = p;
+            renderGame();
+        };
+
+        list.appendChild(btn);
+    });
 }
 
 // =====================
-// START GAME
+// GAME LAYOUT
 // =====================
 
-function startGame(profile) {
+function renderGame() {
 
-    currentProfile = profile;
+    STATE.mode = "GAME";
 
-    document.body.innerHTML = `
-    <div id="app">
+    const p = STATE.profile;
 
+    document.getElementById("app").innerHTML = `
         <div id="topbar">
-            <div id="charName"></div>
-
+            <div>${p.name}</div>
             <div>
                 <button id="cardsBtn">Cards</button>
                 <button id="indexBtn">Index</button>
@@ -117,30 +121,24 @@ function startGame(profile) {
         </div>
 
         <div id="layout">
-
             <div id="worldPanel">
                 <div id="worldList"></div>
                 <div id="worldFooter">
-                    <button id="completeWorldBtn">Complete World</button>
+                    <button id="completeBtn">Complete World</button>
                 </div>
             </div>
 
             <div id="mainPanel"></div>
-
         </div>
-
-    </div>
     `;
 
-    document.getElementById("charName").textContent = profile.name;
-
-    setupButtons();
+    bindGameEvents();
     renderWorlds();
     renderCards();
 }
 
 // =====================
-// WORLD RENDER
+// WORLD
 // =====================
 
 function renderWorlds() {
@@ -148,77 +146,102 @@ function renderWorlds() {
     const list = document.getElementById("worldList");
     list.innerHTML = "";
 
-    const currentIndex = worlds.indexOf(currentProfile.currentWorld);
+    const index = worlds.indexOf(STATE.profile.currentWorld);
 
     worlds.forEach((w, i) => {
 
         const div = document.createElement("div");
         div.className = "worldItem";
 
-        if (i === currentIndex) div.classList.add("current");
+        if (i === index) div.classList.add("current");
 
         div.textContent = w;
         list.appendChild(div);
     });
-
-    setTimeout(() => {
-
-        const items = document.querySelectorAll(".worldItem");
-        const target = items[currentIndex];
-
-        if (!target) return;
-
-        target.scrollIntoView({ block: "center" });
-
-    }, 50);
 }
 
 // =====================
-// COMPLETE WORLD → DRAFT
+// COMPLETE WORLD
 // =====================
 
 function completeWorld() {
 
-    const profiles = getProfiles();
-    const idx = profiles.findIndex(p => p.name === currentProfile.name);
+    const p = STATE.profile;
 
-    const worldIndex = worlds.indexOf(currentProfile.currentWorld);
+    const idx = worlds.indexOf(p.currentWorld);
 
-    if (worldIndex < worlds.length - 1) {
+    if (idx < worlds.length - 1) {
+        p.currentWorld = worlds[idx + 1];
 
-        profiles[idx].currentWorld = worlds[worldIndex + 1];
-        saveProfiles(profiles);
-
-        currentProfile = profiles[idx];
+        saveProfileUpdate(p);
 
         renderWorlds();
-        showCardDraft(); // IMPORTANT
+        showDraft();
     }
 }
 
 // =====================
-// CARD LOOKUP SAFE
+// SAVE UPDATE
 // =====================
 
-function findCard(name) {
-    if (typeof cards === "undefined") return null;
-    return cards.find(c => c.name === name) || null;
+function saveProfileUpdate(profile) {
+
+    const profiles = getProfiles();
+
+    const idx = profiles.findIndex(x => x.name === profile.name);
+
+    profiles[idx] = profile;
+
+    saveProfiles(profiles);
 }
 
 // =====================
-// TREE COLORS
+// CARDS
 // =====================
 
-function getTreeColor(tree) {
+function renderCards() {
 
-    switch(tree) {
-        case "Offense": return "#ff4d4d";
-        case "Defense": return "#4da6ff";
-        case "Control": return "#4dff88";
-        case "Gear": return "#ffd24d";
-        case "Mastery": return "#c266ff";
-        default: return "white";
+    const p = STATE.profile;
+
+    const panel = document.getElementById("mainPanel");
+
+    panel.innerHTML = `<h2>Cards</h2>`;
+
+    const wrap = document.createElement("div");
+    wrap.className = "cardContainer";
+
+    (p.ownedCards || []).forEach(name => {
+
+        const c = typeof cards !== "undefined"
+            ? cards.find(x => x.name === name)
+            : null;
+
+        if (!c) return;
+
+        wrap.appendChild(makeCard(c));
+    });
+
+    panel.appendChild(wrap);
+}
+
+// =====================
+// INDEX
+// =====================
+
+function renderIndex() {
+
+    const panel = document.getElementById("mainPanel");
+
+    panel.innerHTML = `<h2>Index</h2>`;
+
+    const wrap = document.createElement("div");
+    wrap.className = "cardContainer";
+
+    if (typeof cards !== "undefined") {
+        cards.forEach(c => wrap.appendChild(makeCard(c)));
     }
+
+    panel.appendChild(wrap);
 }
 
 // =====================
@@ -236,79 +259,33 @@ function makeCard(card) {
     div.innerHTML = `
         <h3>${card.name}</h3>
         <p>${card.effect}</p>
-        <div class="tree" style="color:${getTreeColor(card.tree)}">
-            ${card.tree}
-        </div>
+        <div class="tree">${card.tree}</div>
     `;
 
     return div;
 }
 
 // =====================
-// MAIN VIEW
+// DRAFT SYSTEM
 // =====================
 
-function renderCards() {
-
-    const panel = document.getElementById("mainPanel");
-    panel.innerHTML = "";
-
-    const container = document.createElement("div");
-    container.className = "cardContainer";
-
-    currentProfile.ownedCards.forEach(name => {
-
-        const card = findCard(name);
-        if (!card) return;
-
-        container.appendChild(makeCard(card));
-    });
-
-    panel.appendChild(container);
-}
-
-// =====================
-// INDEX VIEW
-// =====================
-
-function renderIndex() {
-
-    const panel = document.getElementById("mainPanel");
-    panel.innerHTML = "<h2>Card Index</h2>";
-
-    const container = document.createElement("div");
-    container.className = "cardContainer";
-
-    if (typeof cards !== "undefined") {
-        cards.forEach(c => container.appendChild(makeCard(c)));
-    }
-
-    panel.appendChild(container);
-}
-
-// =====================
-// DRAFT SYSTEM (FULLSCREEN MODAL)
-// =====================
-
-function showCardDraft() {
+function showDraft() {
 
     const overlay = document.createElement("div");
     overlay.id = "draftOverlay";
 
     overlay.innerHTML = `
         <div id="draftBox">
-            <h2>Choose Your Reward</h2>
+            <h2>Choose Reward</h2>
             <div id="draftCards"></div>
         </div>
     `;
 
     document.body.appendChild(overlay);
 
-    const draft = document.getElementById("draftCards");
+    const box = document.getElementById("draftCards");
 
-    const pool = (typeof cards !== "undefined")
-        ? [...cards].sort(() => 0.5 - Math.random()).slice(0, 3)
-        : [];
+    const pool = [...cards].sort(() => 0.5 - Math.random()).slice(0, 3);
 
     pool.forEach(c => {
 
@@ -317,34 +294,30 @@ function showCardDraft() {
 
         el.onclick = () => {
 
-            currentProfile.ownedCards.push(c.name);
+            STATE.profile.ownedCards.push(c.name);
 
-            const profiles = getProfiles();
-            const idx = profiles.findIndex(p => p.name === currentProfile.name);
-
-            profiles[idx] = currentProfile;
-            saveProfiles(profiles);
+            saveProfileUpdate(STATE.profile);
 
             overlay.remove();
 
             renderCards();
         };
 
-        draft.appendChild(el);
+        box.appendChild(el);
     });
 }
 
 // =====================
-// BUTTONS
+// EVENTS
 // =====================
 
-function setupButtons() {
+function bindGameEvents() {
 
-    document.getElementById("cardsBtn").onclick = () => renderCards();
+    document.getElementById("menuBtn").onclick = renderMenu;
 
-    document.getElementById("indexBtn").onclick = () => renderIndex();
+    document.getElementById("cardsBtn").onclick = renderCards;
 
-    document.getElementById("menuBtn").onclick = () => location.reload();
+    document.getElementById("indexBtn").onclick = renderIndex;
 
-    document.getElementById("completeWorldBtn").onclick = () => completeWorld();
+    document.getElementById("completeBtn").onclick = completeWorld;
 }
