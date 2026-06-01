@@ -11,384 +11,225 @@ const worlds = [
     "Khrysalis"
 ];
 
-// =========================
-// DOM
-// =========================
+// =====================
+// STATE
+// =====================
 
-const createButton =
-    document.getElementById("createProfile");
+let currentProfile = null;
+let viewMode = "cards"; // cards | index
 
-const profileInput =
-    document.getElementById("profileName");
-
-const profilesDiv =
-    document.getElementById("profiles");
-
-// =========================
-// SAVE / LOAD
-// =========================
-
-function saveProfiles(profiles) {
-    localStorage.setItem(
-        "profiles",
-        JSON.stringify(profiles)
-    );
-}
+// =====================
+// LOAD/SAVE
+// =====================
 
 function getProfiles() {
-    return JSON.parse(
-        localStorage.getItem("profiles")
-    ) || [];
+    return JSON.parse(localStorage.getItem("profiles")) || [];
 }
 
-// =========================
-// UTIL
-// =========================
-
-function countOwned(profile, cardName) {
-    return profile.ownedCards.filter(
-        c => c === cardName
-    ).length;
+function saveProfiles(p) {
+    localStorage.setItem("profiles", JSON.stringify(p));
 }
 
-function getCard(name) {
-    return cards.find(c => c.name === name);
-}
+// =====================
+// INIT (TEMP PROFILE SELECT)
+// =====================
 
-// =========================
-// CAPACITY
-// =========================
-
-function getCapacity(profile) {
-
-    const cap = {
-        blades: 0,
-        traps: 0,
-        shields: 0,
-        heals: 0,
-        weaknesses: 0,
-        feints: 0
-    };
-
-    profile.ownedCards.forEach(name => {
-
-        const c = getCard(name);
-        if (!c) return;
-
-        if (c.name === "Additional Blade") cap.blades += 1;
-        if (c.name === "Blade Bundle") cap.blades += 2;
-
-        if (c.name === "Additional Trap") cap.traps += 1;
-        if (c.name === "Trap Bundle") cap.traps += 2;
-
-        if (c.name === "Additional Shield") cap.shields += 1;
-        if (c.name === "Shield Bundle") cap.shields += 2;
-
-        if (c.name === "Additional Heal") cap.heals += 1;
-
-        if (c.name === "Additional Weakness") cap.weaknesses += 1;
-
-        if (c.name === "Additional Feint") cap.feints += 1;
-    });
-
-    return cap;
-}
-
-// =========================
-// ELIGIBILITY
-// =========================
-
-function isEligible(profile, card) {
-
-    const cap = getCapacity(profile);
-
-    const ownedCount = countOwned(profile, card.name);
-
-    if (ownedCount >= card.maxCopies) return false;
-
-    const req = card.requirements || {};
-
-    if (req.cards) {
-        for (let r of req.cards) {
-            if (!profile.ownedCards.includes(r)) {
-                return false;
-            }
-        }
-    }
-
-    if (req.world) {
-        const worldIndex =
-            worlds.indexOf(profile.currentWorld);
-
-        const reqIndex =
-            worlds.indexOf(req.world);
-
-        if (worldIndex < reqIndex) return false;
-    }
-
-    if (req.bladeCapacity && cap.blades < req.bladeCapacity) return false;
-    if (req.trapCapacity && cap.traps < req.trapCapacity) return false;
-    if (req.shieldCapacity && cap.shields < req.shieldCapacity) return false;
-    if (req.healCapacity && cap.heals < req.healCapacity) return false;
-    if (req.weaknessCapacity && cap.weaknesses < req.weaknessCapacity) return false;
-
-    return true;
-}
-
-// =========================
-// RARITY WEIGHTS
-// =========================
-
-function rarityWeight(rarity) {
-    switch (rarity) {
-        case "Common": return 60;
-        case "Uncommon": return 25;
-        case "Rare": return 10;
-        case "Epic": return 4;
-        case "Legendary": return 1;
-        default: return 10;
-    }
-}
-
-// =========================
-// DRAFT
-// =========================
-
-function weightedPick(pool) {
-
-    let total = pool.reduce(
-        (a, c) => a + rarityWeight(c.rarity),
-        0
-    );
-
-    let r = Math.random() * total;
-
-    for (let c of pool) {
-        r -= rarityWeight(c.rarity);
-        if (r <= 0) return c;
-    }
-
-    return pool[0];
-}
-
-function generateDraft(profile) {
-
-    const eligible =
-        cards.filter(c =>
-            isEligible(profile, c)
-        );
-
-    const draft = [];
-    const used = new Set();
-
-    while (draft.length < 3 && eligible.length) {
-
-        const pick = weightedPick(eligible);
-
-        if (used.has(pick.name)) continue;
-
-        used.add(pick.name);
-        draft.push(pick);
-    }
-
-    return draft;
-}
-
-// =========================
-// PROFILE LIST
-// =========================
-
-function loadProfiles() {
-
-    profilesDiv.innerHTML = "";
+function init() {
 
     const profiles = getProfiles();
 
-    profiles.forEach(profile => {
+    if (profiles.length === 0) {
+        document.body.innerHTML = "<h1>No Profiles Found</h1>";
+        return;
+    }
 
-        const btn =
-            document.createElement("button");
+    currentProfile = profiles[0];
 
-        btn.textContent = profile.name;
+    document.getElementById("charName").textContent =
+        currentProfile.name;
 
-        btn.onclick = () => showProfile(profile);
-
-        profilesDiv.appendChild(btn);
-
-    });
-
+    renderWorlds();
+    renderCards();
+    setupButtons();
 }
 
-// =========================
+// =====================
+// WORLD PANEL
+// =====================
+
+function renderWorlds() {
+
+    const panel = document.getElementById("worldPanel");
+    panel.innerHTML = "";
+
+    const currentIndex =
+        worlds.indexOf(currentProfile.currentWorld);
+
+    worlds.forEach((w, i) => {
+
+        const div = document.createElement("div");
+        div.className = "worldItem";
+
+        if (i === currentIndex) {
+            div.classList.add("current");
+        }
+
+        div.textContent = w;
+        panel.appendChild(div);
+    });
+
+    // auto-scroll positioning
+    setTimeout(() => {
+
+        const items =
+            document.querySelectorAll(".worldItem");
+
+        const target = items[currentIndex];
+        if (!target) return;
+
+        target.scrollIntoView({
+            block:
+                currentIndex > worlds.length - 3
+                    ? "end"
+                    : "center"
+        });
+
+    }, 50);
+}
+
+// =====================
+// CAPACITY (simple placeholder)
+// =====================
+
+function getCapacity(profile) {
+
+    let blades = 0;
+    let shields = 0;
+    let traps = 0;
+    let heals = 0;
+    let weaknesses = 0;
+    let feints = 0;
+
+    profile.ownedCards.forEach(name => {
+
+        const c = cards.find(x => x.name === name);
+        if (!c) return;
+
+        if (c.name.includes("Blade")) blades++;
+        if (c.name.includes("Shield")) shields++;
+        if (c.name.includes("Trap")) traps++;
+        if (c.name.includes("Heal")) heals++;
+        if (c.name.includes("Weakness")) weaknesses++;
+        if (c.name.includes("Feint")) feints++;
+    });
+
+    return { blades, shields, traps, heals, weaknesses, feints };
+}
+
+// =====================
 // CARD RENDER
-// =========================
+// =====================
 
-function createCardElement(card, showEffect = false) {
+function makeCard(card) {
 
-    const div =
-        document.createElement("div");
-
+    const div = document.createElement("div");
     div.className = "card";
 
-    // glow by rarity
-    if (card.rarity === "Rare") {
-        div.classList.add("rare");
-    }
-
-    if (card.rarity === "Legendary") {
-        div.classList.add("legendary");
-    }
-
-    div.dataset.tree = card.tree;
+    if (card.rarity === "Rare") div.classList.add("rare");
+    if (card.rarity === "Legendary") div.classList.add("legendary");
 
     div.innerHTML = `
         <h3>${card.name}</h3>
-
-        ${showEffect ? `<p>${card.effect}</p>` : ""}
-
+        <p>${card.effect}</p>
         <div class="tree">${card.tree}</div>
     `;
 
     return div;
 }
 
-// =========================
-// DRAFT SCREEN
-// =========================
+// =====================
+// CARDS VIEW
+// =====================
 
-function showDraft(profile) {
+function renderCards() {
 
-    const draft =
-        generateDraft(profile);
+    const panel = document.getElementById("mainPanel");
+    panel.innerHTML = "";
 
-    document.body.innerHTML = `
-        <h1>Choose A Card</h1>
-        <div id="draftCards" class="cardContainer"></div>
-    `;
+    const cap = getCapacity(currentProfile);
 
-    const container =
-        document.getElementById("draftCards");
-
-    draft.forEach(card => {
-
-        const el = createCardElement(card, true);
-
-        el.onclick = () => {
-
-            const profiles = getProfiles();
-
-            const i = profiles.findIndex(
-                p => p.name === profile.name
-            );
-
-            profiles[i].ownedCards.push(card.name);
-
-            saveProfiles(profiles);
-
-            showProfile(profiles[i]);
-        };
-
-        container.appendChild(el);
-    });
-
-}
-
-// =========================
-// PROFILE SCREEN
-// =========================
-
-function showProfile(profile) {
-
-    const cap = getCapacity(profile);
-
-    document.body.innerHTML = `
-        <h1>${profile.name}</h1>
-
-        <h2>World: ${profile.currentWorld}</h2>
-
-        <button id="completeWorld">Complete World</button>
-
+    const header = document.createElement("div");
+    header.innerHTML = `
         <h2>Capacity</h2>
-        <p>Blades: ${cap.blades} / 5</p>
-        <p>Traps: ${cap.traps} / 5</p>
-        <p>Shields: ${cap.shields} / 6</p>
-        <p>Heals: ${cap.heals} / 3</p>
-        <p>Weaknesses: ${cap.weaknesses} / 3</p>
-        <p>Feints: ${cap.feints} / 3</p>
-
+        <p>Blades: ${cap.blades}</p>
+        <p>Shields: ${cap.shields}</p>
+        <p>Traps: ${cap.traps}</p>
+        <p>Heals: ${cap.heals}</p>
+        <p>Weaknesses: ${cap.weaknesses}</p>
+        <p>Feints: ${cap.feints}</p>
+        <hr>
         <h2>Owned Cards</h2>
-        <div id="ownedCards" class="cardContainer"></div>
-
-        <button id="backButton">Back</button>
     `;
 
-    const container =
-        document.getElementById("ownedCards");
+    panel.appendChild(header);
 
-    profile.ownedCards.forEach(name => {
+    const container = document.createElement("div");
+    container.className = "cardContainer";
 
-        const card = getCard(name);
+    currentProfile.ownedCards.forEach(name => {
+
+        const card = cards.find(c => c.name === name);
         if (!card) return;
 
-        container.appendChild(
-            createCardElement(card, true)
-        );
+        container.appendChild(makeCard(card));
     });
 
-    document.getElementById("completeWorld")
-        .onclick = () => {
-
-            const profiles = getProfiles();
-
-            const i = profiles.findIndex(
-                p => p.name === profile.name
-            );
-
-            const idx =
-                worlds.indexOf(profile.currentWorld);
-
-            if (idx < worlds.length - 1) {
-
-                profiles[i].currentWorld =
-                    worlds[idx + 1];
-
-                saveProfiles(profiles);
-
-                showDraft(profiles[i]);
-            }
-        };
-
-    document.getElementById("backButton")
-        .onclick = () => location.reload();
-
+    panel.appendChild(container);
 }
 
-// =========================
-// CREATE PROFILE
-// =========================
+// =====================
+// CARD INDEX VIEW
+// =====================
 
-createButton.onclick = () => {
+function renderIndex() {
 
-    const name = profileInput.value.trim();
-    if (!name) return;
+    const panel = document.getElementById("mainPanel");
+    panel.innerHTML = "<h2>Card Index</h2>";
 
-    const profiles = getProfiles();
+    const container = document.createElement("div");
+    container.className = "cardContainer";
 
-    const newProfile = {
-        name,
-        currentWorld: "Wizard City",
-        ownedCards: [],
-        redraws: 0,
-        wish: null
-    };
+    cards.forEach(c => {
+        container.appendChild(makeCard(c));
+    });
 
-    profiles.push(newProfile);
+    panel.appendChild(container);
+}
 
-    saveProfiles(profiles);
+// =====================
+// BUTTONS
+// =====================
 
-    profileInput.value = "";
+function setupButtons() {
 
-    showDraft(newProfile);
-};
+    document.getElementById("cardIndexBtn")
+        .onclick = () => {
 
-loadProfiles();
+            viewMode = "index";
+            renderIndex();
+
+        };
+
+    document.getElementById("settingsBtn")
+        .onclick = () => {
+
+            alert("Settings placeholder (export/delete coming next)");
+
+        };
+}
+
+// =====================
+// START
+// =====================
+
+init();
